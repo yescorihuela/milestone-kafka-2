@@ -13,8 +13,8 @@ import (
 
 var mainTopic string = "OrderReceived"
 
-type Saludo struct {
-	Hola string `json:"hola"`
+type Body struct {
+	Content string `json:"content"`
 }
 
 type ErrResponse struct {
@@ -88,14 +88,14 @@ func main() {
 		w.Write([]byte(`{"status": "ok"}`))
 	})
 	r.Post("/order-received", func(w http.ResponseWriter, r *http.Request) {
-		data := &Saludo{}
-		if err := json.NewDecoder(r.Body).Decode(data); err != nil {
+		body := &Body{}
+		if err := json.NewDecoder(r.Body).Decode(body); err != nil {
 			render.Render(w, r, ErrInvalidRequest(err))
 			return
 		}
 
-		t, _ := json.Marshal(data)
-		kafkaProducer(t)
+		data, _ := json.Marshal(body)
+		kafkaProducer(data)
 		w.WriteHeader(http.StatusCreated)
 	})
 	http.ListenAndServe(":3000", r)
